@@ -106,7 +106,7 @@ class Poker(Game):
         """Return a list of the allowable moves at this point."""
 
         # state is organized as
-        # {'card_sets' : [card_set_0, card_set_1], "moving_side" : 0, "last_ply" : {'card': 7 , 'num' : 2}}
+        # {'card_sets' : [card_set_0, card_set_1], "moving_side" : 0, "last_ply" : {'card': 7 , 'num' : 2}, "length" : 0}
 
         card_sets = state['card_sets']
         moving_side = state['moving_side']
@@ -118,7 +118,7 @@ class Poker(Game):
 
         possible_move = []
 
-        if last_card:
+        if last_card != None:
             # the last ply is real card
             for i in range(last_card + 1, len(candidate_set) ):
                 diff_num = candidate_set[i] - last_num
@@ -128,8 +128,8 @@ class Poker(Game):
             # pass if we do not have anythin bigger than that
             # note that sometimes we want to pass even if we can beat it
             # later refine this
-            if len(possible_move) == 0:
-                possible_move.append({'card' : None, 'num' : 0})
+            # if len(possible_move) == 0:
+            possible_move.append({'card' : None, 'num' : 0})
 
         else:
             # the opponent past the last round, and we play whatever we want
@@ -171,7 +171,10 @@ class Poker(Game):
         # mark the new last_ply
         last_ply = move
 
-        new_state = {'card_sets' : card_sets, 'moving_side' : moving_side, 'last_ply' : last_ply}
+        # increat game length
+        new_length = new_state['length'] + 1
+
+        new_state = {'card_sets' : card_sets, 'moving_side' : moving_side, 'last_ply' : last_ply, 'length' : new_length}
         # print('new_state: ')
         # print(new_state)
         return new_state
@@ -184,9 +187,9 @@ class Poker(Game):
         # if meanns the other people wins
         # a little bit tricky and intuitive here; be CRREFUL
         if player != state['moving_side']:
-            return 1
+            return 100 - state['length']
         else:
-            return -1
+            return state['length'] - 100
 
     def terminal_test(self, state):
         """Return True if this is a final state for the game."""
@@ -242,8 +245,9 @@ class Fig52Game(Game):
 # print(best_action)
 
 game = Poker()
-# init_state = {'card_sets' : [[1, 0, 1], [0, 1, 1]], "moving_side" : 0, "last_ply" : {'card': None , 'num' : 0}}
 card_sets = [[2, 2, 2, 0, 3, 3, 0, 1], [0, 0, 0, 2, 0, 0, 2, 0]]
-init_state = {'card_sets' : card_sets, "moving_side" : 0, "last_ply" : {'card': None , 'num' : 0}}
+init_state = {'card_sets' : card_sets, "moving_side" : 0, "last_ply" : {'card': None , 'num' : 0}, 'length' : 0}
+# card_sets = [[0, 2, 2, 0, 2, 2, 0, 1], [0, 0, 0, 1, 0, 0, 2, 0]]
+# init_state = {'card_sets' : card_sets, "moving_side" : 1, "last_ply" : {'card': 0 , 'num' : 1}, 'length' : 7}
 best_action = alphabeta_search(init_state, game)
 print(best_action)
